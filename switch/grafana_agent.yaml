@@ -22,7 +22,7 @@ logs:
               labels:
                 job: suricata
                 host: ${HOSTNAME}
-                interface: ens37
+                interface: br-s1
                 environment: lab
                 __path__: /var/log/suricata/eve.json
           pipeline_stages:

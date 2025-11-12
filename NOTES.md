@@ -80,7 +80,7 @@ sudo systemctl restart grafana-agent
 ```
 sudo nano /etc/suricata/suricata.yaml
 af_packet
-	interface: ...
+	interface: br-s1
 ```
 ## 7.2 Add rule
 ```
