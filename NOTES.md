@@ -1,4 +1,4 @@
-# 1. Setup OvsSwitch
+# 1. Setup OvsSwitch (Switch VM)
 ```
 sudo ovs-vsctl --if-exists del-br br-s1
 
@@ -31,8 +31,20 @@ sudo ovs-vsctl set bridge br-s1 protocols=OpenFlow13
 sysctl -w net.ipv4.ip_forward=1 #Forwarding IP 
 ```
 
-# 2. Config IP Route
-## 2.1. Delete ens37,38 ip route on Switch
+# 2. Start Ryu Controller (Controller VM)
+```
+# Run Ryu script on 1 session
+python controller/simple_l3_router.py
+
+# On the other session, run Ryu exporter
+python controller/ryu_exporter.py
+# Or run Ryu Exporter with Docker Container
+docker build -t "ryu_exporter:<version>" controller/
+docker run --name ryu_exporter -d -p 9100:9100 ryu_exporter:<version>
+```
+
+# 3. Config IP Route
+## 3.1. Delete ens37,38 ip route on Switch VM
 ```
 sudo ip route del 192.168.184.0/24 dev ens37
 sudo ip route del 192.168.111.0/24 dev ens38
@@ -41,28 +53,28 @@ sudo ip route del 192.168.111.0/24 dev ens38
 
 
 
-# 3. Attacking
+# 4. Attacking
 ```
 sudo hping3 -c 10000 -d 120 -S -w 64 -p 21 --flood --rand-source 192.168.111.13
 sudo hping3 -c 10000 -d 120 -S -w 64 -p 80 --flood --rand-source 192.168.111.13
 ```
-# 4. Check Alert logs Suricata
+# 5. Check Alert logs Suricata
 ```
 sudo tail -f /var/log/suricata/fast.log
 ```
-# 5. Config Grafana Agent on Switch
+# 6. Config Grafana Agent on Switch
 ```
 sudo nano /etc/grafana-agent/agent.yaml
 sudo systemctl restart grafana-agent
 ```
-# 6. Edit Suricata.yaml
-## 6.1. Set  interface
+# 7. Edit Suricata.yaml
+## 7.1. Set  interface
 ```
 sudo nano /etc/suricata/suricata.yaml
 af_packet
 	interface: ...
 ```
-## 6.2 Add rule
+## 7.2 Add rule
 ```
 sudo nano /etc/suricata/rules/local.rules
 alert tcp any any <> any any (msg:"Possible DDoS attack"; classtype:denial-of-service; sid:1001001; flags:PA;)
