@@ -44,13 +44,21 @@ docker run --name ryu_exporter -d -p 9100:9100 ryu_exporter:<version>
 ```
 
 # 3. Config IP Route
-## 3.1. Delete ens37,38 ip route on Switch VM
+- Delete ens37,38 ip route on Switch VM -> change to using OVSSwitch Gateway
 ```
 sudo ip route del 192.168.184.0/24 dev ens37
 sudo ip route del 192.168.111.0/24 dev ens38
 ```
 -  Attacker and Victim needs to change default ip route to OvsSwitch's Gateway in order to send requests to OvsSwitch
+```
+# Attacker
+sudo ip route del 192.168.184.0/24 dev ens37
+sudo ip route add default via 192.168.184.20 dev ens37 
 
+# Victim
+sudo ip route del 192.168.111.0/24 dev ens37
+sudo ip route add default via 192.168.111.20 dev ens37 
+```
 
 
 # 4. Attacking
