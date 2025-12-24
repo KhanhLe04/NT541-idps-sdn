@@ -10,6 +10,35 @@
 | Victim VM | VMNet 2 | VMNet 2: 192.168.111.13/24 |
 | Attacker | VMNet 1 | 192.168.184.11 |
 ## Notes for this project: [Note](NOTES.md)
+## Workflow
+### DDoS Attack
+```mermaid
+sequenceDiagram
+    participant A as Attacker (hping3)
+    participant S as OVS Switch
+    participant C as Ryu Controller
+    participant I as Suricata IDS
+    participant V as Victim
+
+    Note over A: Bắt đầu tấn công SYN Flood
+    loop Hàng ngàn packets/giây
+        A->>S: Gửi TCP SYN (Src IP ngẫu nhiên)
+        
+        par Xử lý SDN
+            S->>C: Packet-In (Gói tin mới)
+            C->>S: Packet-Out + FlowMod (Cài luật)
+            Note right of C: CPU Controller tăng vọt (Quá tải)
+        and Xử lý IDS
+            S->>I: Mirror/Copy Traffic
+            I->>I: Khớp luật (Signature Match)
+            I-->>Log: Ghi log "Possible DDoS attack"
+        end
+        
+        S->>V: Chuyển tiếp gói tin (Nếu không bị drop)
+    end
+```
+
+
 ## Result:
 - Created a SDN Architecture with OVSSwitch and Ryu Controller
 ![SDN](img/ovsctl.png)
